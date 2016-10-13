@@ -11,9 +11,13 @@ app.use(bodyParser.urlencoded({ extended: false })); // forms
 app.use(bodyParser.json()); // JSON
 app.use(cookieParser());
 
-var urlDatabase = {
+let urlDatabase = {
   //'b2xVn2': 'http://www.lighthouselabs.ca',
   //'9sm5xK': 'http://www.google.com'
+};
+
+let users = {
+
 };
 
 app.get('/', (req, res) => {
@@ -21,9 +25,15 @@ app.get('/', (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
+  let userId = req.cookies.user_id;
+  let email = '';
+  if (users[userId]) {
+    email = users[userId].email;
+  }
+
   let templateVars = {
     urls: urlDatabase,
-    username: req.cookies.username,
+    email: email,
   };
   res.render('urls_index', templateVars);
 });
@@ -40,6 +50,14 @@ app.get('/urls/:id', (req, res) => {
 app.get('/u/:shortURL', (req, res) => {
   let longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
+});
+
+app.get('/register', (req, res) => {
+  res.render('urls_register');
+});
+
+app.get('/login', (req, res) => {
+  res.render('urls_login');
 });
 
 app.post('/urls', (req, res) => {
@@ -62,14 +80,56 @@ app.post('/urls/:id/delete', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  let username = req.body.username;
-  res.cookie('username', username, { expires: new Date(Date.now() + 900000), httpOnly: true });
+  const email = req.body.email;
+  const password = req.body.password;
+  let matchExists = false;
+  for (user in users) {
+    if (users[user].email == email && users[user].password == password) {
+      matchExists = true;
+      res.cookie('user_id', user);
+      break;
+    }
+  }
+
+  if (!matchExists) {
+    res.status(403);
+  }
+
   res.redirect('/');
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect('/');
+});
+
+app.post('/register', (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  const userRandomId = generateRandomString();
+  if (email && password) {
+    let emailExists = false;
+
+    for (user in users) {
+      if (users[user].email == email) {
+        emailExists = true;
+      }
+    }
+
+    if (!emailExists) {
+      users[userRandomId] = { id: userRandomId, email: email, password: password };
+      res.cookie('user_id', userRandomId);
+      res.redirect('/');
+      console.log(users);
+    } else {
+      res.status(400);
+      res.redirect('/login');
+    }
+
+  } else {
+    res.status(400);
+    res.redirect('/login');
+  }
 });
 
 app.listen(PORT, () => {
