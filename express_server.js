@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 
 const PORT = process.env.PORT || 8080; // default port 8080
 
@@ -8,14 +9,22 @@ const app = express();
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: false })); // forms
 app.use(bodyParser.json()); // JSON
+app.use(cookieParser());
 
 var urlDatabase = {
   //'b2xVn2': 'http://www.lighthouselabs.ca',
   //'9sm5xK': 'http://www.google.com'
 };
 
+app.get('/', (req, res) => {
+  res.redirect('/urls');
+});
+
 app.get('/urls', (req, res) => {
-  let templateVars = { urls: urlDatabase };
+  let templateVars = {
+    urls: urlDatabase,
+    username: req.cookies.username,
+  };
   res.render('urls_index', templateVars);
 });
 
@@ -50,6 +59,17 @@ app.post('/urls/:id/delete', (req, res) => {
   let shortURL = req.params.id;
   delete urlDatabase[shortURL];
   res.redirect('/urls');
+});
+
+app.post('/login', (req, res) => {
+  let username = req.body.username;
+  res.cookie('username', username, { expires: new Date(Date.now() + 900000), httpOnly: true });
+  res.redirect('/');
+});
+
+app.post('/logout', (req, res) => {
+  res.clearCookie('username');
+  res.redirect('/');
 });
 
 app.listen(PORT, () => {
