@@ -12,13 +12,12 @@ app.use(bodyParser.json()); // JSON
 app.use(cookieParser());
 
 let urlDatabase = {
-  //'b2xVn2': 'http://www.lighthouselabs.ca',
-  //'9sm5xK': 'http://www.google.com'
+  // 'randUserId' :
+  //        { 'b2xVn2': 'http://www.lighthouselabs.ca',
+  //          '9sm5xK': 'http://www.google.com'}
 };
 
-let users = {
-
-};
+let users = {};
 
 app.get('/', (req, res) => {
   res.redirect('/urls');
@@ -39,7 +38,12 @@ app.get('/urls', (req, res) => {
 });
 
 app.get('/urls/new', (req, res) => {
-  res.render('urls_new');
+  let userId = req.cookies.user_id;
+  if (users[userId]) {
+    res.render('urls_new');
+  } else {
+    res.redirect('/login');
+  }
 });
 
 app.get('/urls/:id', (req, res) => {
