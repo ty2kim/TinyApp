@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <body>
-  <% include partials/_header %>
   <p>ShortURL: <strong><%= shortURL %></strong></p>
   <form action="/urls/<%= shortURL %>" method="POST" style="margin:150px;">
     <input id="longURL" type="text" name="longURL" placeholder="http://" style="width: 300px">

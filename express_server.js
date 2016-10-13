@@ -120,7 +120,6 @@ app.post('/register', (req, res) => {
       users[userRandomId] = { id: userRandomId, email: email, password: password };
       res.cookie('user_id', userRandomId);
       res.redirect('/');
-      console.log(users);
     } else {
       res.status(400);
       res.redirect('/login');
