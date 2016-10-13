@@ -2,15 +2,15 @@
 <html lang="en">
 <body>
   <% include partials/_header %>
-    <% for (url in urls) { %>
-      <div style="padding: 10px;">
-        <%= url %> &#8594; <%= urls[url] %>
-        <a href="/urls/<%= url %>" style="padding: 0 10px 0 10px;">Edit</a>
-        <form style="display: inline;" action="/urls/<%= url %>/delete" method="POST">
-          <input type="submit" value="Delete" name="<%= url %>">
-        </form>
-      </div>
-    <% } %>
+  <% for (url in urls) { %>
+  <div>
+    <%= url %> &#8594; <%= urls[url] %>
+    <a href="/urls/<%= url %>">Edit</a>
+    <form style="display: inline;" action="/urls/<%= url %>/delete" method="POST">
+      <input type="submit" value="Delete">
+    </form>
+  </div>
+  <% } %>
   <form action="/urls/new" method="GET">
     <input type="submit" value="new">
   </form>

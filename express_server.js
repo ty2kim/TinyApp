@@ -10,8 +10,8 @@ app.use(bodyParser.urlencoded({ extended: false })); // forms
 app.use(bodyParser.json()); // JSON
 
 var urlDatabase = {
-  'b2xVn2': 'http://www.lighthouselabs.ca',
-  '9sm5xK': 'http://www.google.com'
+  //'b2xVn2': 'http://www.lighthouselabs.ca',
+  //'9sm5xK': 'http://www.google.com'
 };
 
 app.get('/urls', (req, res) => {

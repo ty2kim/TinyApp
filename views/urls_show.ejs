@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <body>
-  <li> ShortURL: <%= shortURL %> </li>
+  <% include partials/_header %>
+  <p>ShortURL: <strong><%= shortURL %></strong></p>
   <form action="/urls/<%= shortURL %>" method="POST" style="margin:150px;">
     <input id="longURL" type="text" name="longURL" placeholder="http://" style="width: 300px">
     <input type="submit" value="Submit">
   </form>
-  <a href="/urls">Go Back</a>
+  <form action="/urls" method="GET">
+    <input type="submit" value="Go Back">
+  </form>
 </body>
 </html>
