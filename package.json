@@ -4,6 +4,7 @@
   "description": "A \"full stack\" web app built with node and express that allows users to shorten long URLs",
   "main": "express_server.js",
   "scripts": {
+    "start": "node express_server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+  <header>
+    <% include partials/_header %>
+  </header>
+  <ul>
+    <% for (let i = 0; i < Object.keys(urls).length; i++) {%>
+    <div>
+      <li> Long URL: <%= urls[Object.keys(urls)[i]] %> </li>
+      <li> Short URL: <%= Object.keys(urls)[i] %> </li>
+      <form action="/urls/<%= Object.keys(urls)[i] %>/delete" method="POST">
+        <input type="submit" value="delete" name="<%= Object.keys(urls)[i] %>">
+      </form>
+      <a href="/urls/<%= Object.keys(urls)[i] %>">update</a>
+    </div>
+    <% } %>
+  </ul>
+  <a href='/urls/new'>Shorten New URL</a>
+</body>
+</html>
