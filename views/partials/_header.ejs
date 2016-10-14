@@ -1,16 +1,19 @@
 <!-- views/partials/_header.ejs -->
 
 <header>TinyApp</header>
-<p>User: <%= email %></p>
-<% if(email) { %>
+<% if (userId) { %>
+  Email: <%= email %>
+  <form action="/urls" method="GET">
+    <input type="submit" value="My Links">
+  </form>
   <form action="/logout" method="POST">
-    <input type="submit" value="Log Out">
+    <input type="submit" value="Sign Out">
   </form>
 <% } else { %>
-  <form action="/login" method="GET">
-    <input type="submit" value="Log In">
+  <form action="/login" method="POST">
+    <input type="submit" value="Sign In">
   </form>
-  <form action="/register" method="GET">
+  <form action="/register">
     <input type="submit" value="Register">
   </form>
 <% } %>

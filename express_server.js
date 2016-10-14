@@ -19,77 +19,131 @@ let urlDatabase = {};
 let users = {};
 
 app.get('/', (req, res) => {
-  res.redirect('/urls');
-});
-
-app.get('/urls', (req, res) => {
   const userId = req.session.user_id;
-  let renderURLs = {};
-  let templateVars = {
-    DB: urlDatabase,
-    email: '',
-    cookie: false,
-  };
-  if (users[userId]) {
-    templateVars.email = users[userId].email;
-    renderURLs[userId] = urlDatabase[userId];
-    templateVars.DB = renderURLs;
-    templateVars.cookie = true;
-  }
-
-  res.render('urls_index', templateVars);
-});
-
-app.get('/urls/new', (req, res) => {
-  const userId = req.session.user_id;
-  if (users[userId]) {
-    res.render('urls_new');
+  if (userId) {
+    res.redirect('/urls');
   } else {
     res.redirect('/login');
   }
 });
 
+app.get('/urls', (req, res) => {
+  const userId = req.session.user_id;
+  let templateVars = {
+    urls: urlDatabase,
+    userId: '',
+    email: '',
+  };
+  if (userId) {
+    templateVars.userId = userId;
+    templateVars.email = users[userId].email;
+    res.status(200);
+    res.render('urls_index', templateVars);
+  } else {
+    res.status(401);
+    res.render('urls_notfound', { message: 'User is not logged in.', link: 'login', code: 401, });
+  }
+});
+
+app.get('/urls/new', (req, res) => {
+  const userId = req.session.user_id;
+  if (userId) {
+    let templateVars = {
+      userId: userId,
+      email: users[userId].email,
+    };
+    res.status(200);
+    res.render('urls_new', templateVars);
+  } else {
+    res.status(401);
+    res.render('urls_notfound', { message: 'User is not logged in.', link: 'login', code: 401, });
+  }
+});
+
 app.get('/urls/:id', (req, res) => {
-  let templateVars = { shortURL: req.params.id };
-  res.render('urls_show', templateVars);
+  const userId = req.session.user_id;
+  const url = req.params.id;
+  if (!_.findKey(urlDatabase, url)) {
+    res.status(404);
+    res.render('urls_notfound', { message: `${url} does not exist`, link: '', code: 404, });
+  } else if (!userId) {
+    res.render('urls_notfound', { message: 'User is not logged in.', link: 'login', code: 401, });
+  } else if (_.findKey(urlDatabase, url) != userId) {
+    res.status(403);
+    res.render('urls_notfound', { message: 'Logged in user does not match the user that owns this url', link: '', code: 403, });
+  } else {
+    res.status(200);
+    let templateVars = { shortURL: url };
+    res.render('urls_show', templateVars);
+  }
 });
 
 app.get('/u/:shortURL', (req, res) => {
   const userId = req.session.user_id;
   const shortURL = req.params.shortURL;
-  if (!userId) {
-    userId = _.findKey(urlDatabase, shortURL);
+  const key = _.findKey(urlDatabase, shortURL);
+  if (key) {
+    const longURL = urlDatabase[key][shortURL];
+    res.redirect(longURL);
+  } else {
+    res.status(404);
+    res.render('urls_notfound', { message: `${shortURL} does not exist`, link: '', code: 404, });
   }
-
-  const longURL = urlDatabase[userId][shortURL];
-  res.redirect(longURL);
 });
 
 app.get('/register', (req, res) => {
-  res.render('urls_register');
+  const userId = req.session.user_id;
+  if (userId) {
+    res.redirect('/');
+  } else {
+    res.status(200);
+    res.render('urls_register');
+  }
 });
 
 app.get('/login', (req, res) => {
-  res.render('urls_login');
+  const userId = req.session.user_id;
+  if (userId) {
+    res.redirect('/');
+  } else {
+    res.status(200);
+    res.render('urls_login');
+  }
 });
 
 app.post('/urls', (req, res) => {
   const userId = req.session.user_id;
   const randomShortURL = generateRandomString();
-  if (!urlDatabase[userId]) {
-    urlDatabase[userId] = {};
-  }
+  if (userId) {
+    if (!urlDatabase[userId]) {
+      urlDatabase[userId] = {};
+    }
 
-  urlDatabase[userId][randomShortURL] = req.body.longURL;
-  res.redirect('/urls');
+    urlDatabase[userId][randomShortURL] = req.body.longURL;
+    res.redirect(`/urls/${randomShortURL}`);
+  } else {
+    res.status(401);
+    res.render('urls_notfound', { message: 'User is not logged in.', link: 'login', code: 401, });
+  }
 });
 
 app.post('/urls/:id', (req, res) => {
   const userId = req.session.user_id;
   const shortURL = req.params.id;
   const newLongURL = req.body.longURL;
-  urlDatabase[userId][shortURL] = newLongURL;
-  res.redirect('/urls');
+  const key = _.findKey(urlDatabase, shortURL);
+  if (!key) {
+    res.status(404);
+    res.render('urls_notfound', { message: `${shortURL} does not exist`, link: '', code: 404, });
+  } else if (!userId) {
+    res.render('urls_notfound', { message: 'User is not logged in.', link: 'login', code: 401, });
+  } else if (_.findKey(urlDatabase, shortURL) != userId) {
+    res.status(403);
+    res.render('urls_notfound', { message: 'Ristricted access', link: '', code: 403, });
+  } else {
+    urlDatabase[userId][shortURL] = newLongURL;
+    res.redirect(`/urls/${shortURL}`);
+  }
 });
 
 app.post('/urls/:id/delete', (req, res) => {
@@ -105,11 +159,11 @@ app.post('/login', (req, res) => {
   const userId = _.findKey(users, ['email', email]);
   if (userId && bcrypt.compareSync(password, users[userId].password)) {
     req.session.user_id = userId;
+    res.redirect('/');
   } else {
-    res.status(403);
+    res.status(401);
+    res.render('urls_notfound', { message: 'No matching email & password', link: '', code: 401 });
   }
-
-  res.redirect('/');
 });
 
 app.post('/logout', (req, res) => {
@@ -122,14 +176,17 @@ app.post('/register', (req, res) => {
   const password = req.body.password;
   const userRandomId = generateRandomString();
   const userId = _.findKey(users, ['email', email]);
-  if (email && password && !userId) {
+  if (!email || !password) {
+    res.status(400);
+    res.send('Email or password are empty');
+  } else if (userId) {
+    res.status(400);
+    res.send('Email already exist');
+  } else {
     const hashedPassword = bcrypt.hashSync(password);
     users[userRandomId] = { id: userRandomId, email: email, password: hashedPassword };
     req.session.user_id = userRandomId;
     res.redirect('/');
-  } else {
-    res.status(400);
-    res.redirect('/login');
   }
 });
 
