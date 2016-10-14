@@ -26,14 +26,21 @@ app.get('/', (req, res) => {
 app.get('/urls', (req, res) => {
   let userId = req.cookies.user_id;
   let email = '';
+  let renderURLs = {};
+  let cookieExists = true;
 
   if (users[userId]) {
     email = users[userId].email;
+    renderURLs[userId] = urlDatabase[userId];
+  } else {
+    renderURLs = urlDatabase;
+    cookieExists = false;
   }
 
   let templateVars = {
-    urls: urlDatabase[userId],
+    DB: renderURLs,
     email: email,
+    cookie: cookieExists,
   };
   res.render('urls_index', templateVars);
 });
@@ -54,7 +61,18 @@ app.get('/urls/:id', (req, res) => {
 
 app.get('/u/:shortURL', (req, res) => {
   let userId = req.cookies.user_id;
-  let longURL = urlDatabase[userId][req.params.shortURL];
+  let longURL = '';
+  if (!userId) {
+    for (user in urlDatabase) {
+      if (urlDatabase[user][req.params.shortURL]) {
+        longURL = urlDatabase[user][req.params.shortURL];
+        break;
+      }
+    }
+  } else {
+    longURL = urlDatabase[userId][req.params.shortURL];
+  }
+
   res.redirect(longURL);
 });
 
