@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt-nodejs');
 const _ = require('lodash');
+const methodOverride = require('method-override');
 
 const PORT = process.env.PORT || 8080; // default port 8080
 
@@ -14,6 +15,7 @@ app.use(bodyParser.json()); // JSON
 app.use(cookieSession({
   keys: ['user_id'],
 }));
+app.use(methodOverride('_method'));
 
 let urlDatabase = {};
 let users = {};

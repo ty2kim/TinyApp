@@ -2,12 +2,14 @@
 <html lang="en">
 <body>
   ShortURL: <%= shortURL %>
-  <form action="/urls/<%= shortURL %>" method="POST" style="margin:150px;">
+  <form action="/urls/<%= shortURL %>" method="POST" style="margin:150px;" enctype="application/x-www-form-urlencoded">
+    <input type="hidden" name="_method" value="PUT">
     <input id="longURL" type="text" name="longURL" placeholder="http://" style="width: 300px">
-    <input type="submit" value="Update">
+    <button type="submit">Update</button>
   </form>
-  <form action="/urls/<%= shortURL %>/delete" method="POST">
-    <input type="submit" value="Delete">
+  <form action="/urls/<%= shortURL %>/delete" method="POST" enctype="application/x-www-form-urlencoded">
+    <input type="hidden" name="_method" value="DELETE">
+    <button type="submit">Delete</button>
   </form>
 </body>
 </html>

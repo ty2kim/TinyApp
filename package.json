@@ -31,6 +31,7 @@
     "cookie-session": "^2.0.0-alpha.1",
     "ejs": "^2.5.2",
     "express": "^4.14.0",
-    "lodash": "^4.16.4"
+    "lodash": "^4.16.4",
+    "method-override": "^2.3.6"
   }
 }
