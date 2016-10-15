@@ -5,7 +5,9 @@
   <% if (userId) { %>
     <% for (url in urls[userId]) { %>
       <%= url %> &#8594; <%= urls[userId][url] %>
-      <a href="/urls/<%= url %>">Edit</a>
+      <form action="/urls/<%= url %>" method="GET">
+        <button type="submit">Edit</button>
+      </form>
       <form action="/urls/<%= url %>/delete" method="POST" style="display: inline;" enctype="application/x-www-form-urlencoded">
         <input type="hidden" name="_method" value="DELETE">
         <button type="submit">Delete</button>
