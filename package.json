@@ -16,7 +16,9 @@
     "Node",
     "express",
     "cookie",
-    "bcrypt"
+    "bcrypt",
+    "method-override",
+    "lodash"
   ],
   "author": "TAE YOUNG KIM",
   "license": "UNLICENSED",
