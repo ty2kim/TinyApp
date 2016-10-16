@@ -17,8 +17,22 @@ app.use(cookieSession({
 }));
 app.use(methodOverride('_method'));
 
-let urlDatabase = {};
-let users = {};
+let urlDatabase = {
+  // user1: { { shortURL: shortUrl1, longURL: longUrl1 },
+  //          { shortURL: shortUrl2, longURL: longUrl2 },
+  //            ... },
+  // user2: { ... },
+};
+let users = {
+  // user1: { id: user1, email: user1@example.com, password: hashed1 },
+  // user2: { id: user2, email: user2@example.com, password: hashed2 },
+  // ...
+};
+let analytics = {
+  // shortURL1: { users: { user1: ?, user2: ?, ... },
+  //              visitors: { visitor1: ?, visitor2: ?, ... },
+  // shortURL2: { ... },
+};
 
 app.get('/', (req, res) => {
   const userId = req.session.user_id;
@@ -74,6 +88,9 @@ app.get('/urls/:id', (req, res) => {
     res.status(403);
     res.render('urls_notfound', { message: 'Logged in user does not match the user that owns this url', link: '', code: 403, });
   } else {
+    // edit
+
+    // edit
     res.status(200);
     let templateVars = { shortURL: url };
     res.render('urls_show', templateVars);
@@ -85,6 +102,9 @@ app.get('/u/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   const key = _.findKey(urlDatabase, shortURL);
   if (key) {
+    // edit
+
+    // edit
     const longURL = urlDatabase[key][shortURL];
     res.redirect(longURL);
   } else {
