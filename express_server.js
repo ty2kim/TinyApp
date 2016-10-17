@@ -13,9 +13,25 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: false })); // forms
 app.use(bodyParser.json()); // JSON
 app.use(cookieSession({
-  keys: ['user_id'],
+  keys: ['user_id', 'visitor_id'],
 }));
 app.use(methodOverride('_method'));
+
+function timeStamp() {
+  var now = new Date();
+  var date = [now.getMonth() + 1, now.getDate(), now.getFullYear()];
+  var time = [now.getHours(), now.getMinutes(), now.getSeconds()];
+  var suffix = (time[0] < 12) ? 'AM' : 'PM';
+  time[0] = (time[0] < 12) ? time[0] : time[0] - 12;
+  time[0] = time[0] || 12;
+  for (var i = 1; i < 3; i++) {
+    if (time[i] < 10) {
+      time[i] = '0' + time[i];
+    }
+  }
+
+  return date.join('/') + ' ' + time.join(':') + ' ' + suffix;
+}
 
 let urlDatabase = {
   // user1: { { shortURL: shortUrl1, longURL: longUrl1 },
@@ -29,10 +45,15 @@ let users = {
   // ...
 };
 let analytics = {
-  // shortURL1: { users: { user1: ?, user2: ?, ... },
-  //              visitors: { visitor1: ?, visitor2: ?, ... },
-  // shortURL2: { ... },
+  // shortURL1: { numVisits: ?,
+  //              visitors: { visitor1: [time1, time2, ...],
+  //                          visitor2: [time1, time2, ...], } },
+  // shortURL2: { numVisits: ?,
+  //              visitors: { visitor1: [time1, time2, ...],
+  //                          visitor2: [time1, time2, ...], } },
+  // ...
 };
+let nonUser = { id: '' };
 
 app.get('/', (req, res) => {
   const userId = req.session.user_id;
@@ -88,23 +109,41 @@ app.get('/urls/:id', (req, res) => {
     res.status(403);
     res.render('urls_notfound', { message: 'Logged in user does not match the user that owns this url', link: '', code: 403, });
   } else {
-    // edit
-
-    // edit
     res.status(200);
-    let templateVars = { shortURL: url };
+    let templateVars = { shortURL: url, analytics: '', };
+    if (analytics[url]) {
+      templateVars.analytics = analytics[url];
+    }
+
     res.render('urls_show', templateVars);
   }
 });
 
 app.get('/u/:shortURL', (req, res) => {
-  const userId = req.session.user_id;
+  let visitorId = req.session.visitor_id;
   const shortURL = req.params.shortURL;
   const key = _.findKey(urlDatabase, shortURL);
   if (key) {
-    // edit
+    const time = timeStamp();
+    if (!visitorId) {
+      if (!nonUser.id) {
+        nonUser.id = generateRandomString();
+      }
 
-    // edit
+      visitorId = nonUser.id;
+      req.session.visitor_id = visitorId;
+    }
+
+    if (!analytics[shortURL]) {
+      analytics[shortURL] = { numVisits: 0, visitors: {} };
+    }
+
+    if (!analytics[shortURL].visitors[visitorId]) {
+      analytics[shortURL].visitors[visitorId] = [];
+    }
+
+    analytics[shortURL].numVisits++;
+    analytics[shortURL].visitors[visitorId].push(time);
     const longURL = urlDatabase[key][shortURL];
     res.redirect(longURL);
   } else {
@@ -181,6 +220,7 @@ app.post('/login', (req, res) => {
   const userId = _.findKey(users, ['email', email]);
   if (userId && bcrypt.compareSync(password, users[userId].password)) {
     req.session.user_id = userId;
+    req.session.visitor_id = userId;
     res.redirect('/');
   } else {
     res.status(401);
@@ -208,6 +248,7 @@ app.post('/register', (req, res) => {
     const hashedPassword = bcrypt.hashSync(password);
     users[userRandomId] = { id: userRandomId, email: email, password: hashedPassword };
     req.session.user_id = userRandomId;
+    req.session.visitor_id = userRandomId;
     res.redirect('/');
   }
 });

@@ -4,7 +4,7 @@
   <% include partials/_header %>
   <% if (userId) { %>
     <% for (url in urls[userId]) { %>
-      <%= url %> &#8594; <%= urls[userId][url] %>
+      <p><%= url %> &#8594; <%= urls[userId][url] %></p>
       <form action="/urls/<%= url %>" method="GET">
         <button type="submit">Edit</button>
       </form>

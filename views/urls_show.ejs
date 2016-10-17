@@ -11,16 +11,17 @@
     <input type="hidden" name="_method" value="DELETE">
     <button type="submit">Delete</button>
   </form>
+  <p>- Analytics -</p>
+  <% if (analytics) { %>
+    <p>Total Number of Visits for <%= shortURL %>: <%= analytics.numVisits %></p>
+      <% for (visitor in analytics.visitors) { %>
+        Visitor ID: <%= visitor %>
+        <% for (time of analytics.visitors[visitor]) { %>
+          <p>- <%= time %></p>
+        <% } %>
+      <% } %>
+  <% } else { %>
+    No record on visiting <%= shortURL %>
+  <% } %>
 </body>
 </html>
-
-<!--
-1. keep track of how many times a given short URL is visited
-and display it on the edit page for the url
-
-2. keep track of how many UNIQUE visitors visit each url
-(set a cookie to track of distinct users), display this along side the total visitors number
-
-3. keep track of every visit (timestamp, and a generated
-visitor_id) and display the list on the URL edit page
--->
